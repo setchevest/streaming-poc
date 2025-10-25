@@ -1,0 +1,38 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: streaming-ingress
+  namespace: streaming-poc
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/cors-allow-origin: "*"
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: streaming.local # O tu dominio de Cloudflare
+    http:
+      paths:
+      # API Backend
+      - path: /api
+        pathType: Prefix
+        backend:
+          service:
+            name: streaming-api
+            port:
+              number: 3000
+      # HLS Streams
+      - path: /hls
+        pathType: Prefix
+        backend:
+          service:
+            name: transcoder
+            port:
+              number: 8080
+      # MinIO Console (opcional, para debugging)
+      - path: /minio
+        pathType: Prefix
+        backend:
+          service:
+            name: minio
+            port:
+              number: 9001

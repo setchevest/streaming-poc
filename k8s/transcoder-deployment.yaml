@@ -1,0 +1,120 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: transcoder-config
+  namespace: streaming-poc
+data:
+  nginx.conf: |
+    worker_processes auto;
+    rtmp_auto_push on;
+    events {
+      worker_connections 1024;
+    }
+    
+    rtmp {
+      server {
+        listen 1935;
+        chunk_size 4096;
+        
+        application transcode {
+          live on;
+          record off;
+          
+          # HLS Configuration
+          hls on;
+          hls_path /tmp/hls;
+          hls_fragment 3;
+          hls_playlist_length 60;
+          
+          # HLS variants (ABR - Adaptive Bitrate)
+          hls_variant _720p BANDWIDTH=2800000,RESOLUTION=1280x720;
+          hls_variant _480p BANDWIDTH=1400000,RESOLUTION=854x480;
+          hls_variant _360p BANDWIDTH=800000,RESOLUTION=640x360;
+          
+          # Notify backend when HLS segments are ready
+          exec_push mkdir -p /tmp/hls/$name;
+          on_publish http://streaming-api:3000/api/transcode/start;
+          on_publish_done http://streaming-api:3000/api/transcode/done;
+        }
+      }
+    }
+    
+    http {
+      server {
+        listen 8080;
+        
+        location /hls {
+          types {
+            application/vnd.apple.mpegurl m3u8;
+            video/mp2t ts;
+          }
+          root /tmp;
+          add_header Cache-Control no-cache;
+          add_header Access-Control-Allow-Origin *;
+        }
+        
+        location /health {
+          return 200 "OK\n";
+          add_header Content-Type text/plain;
+        }
+      }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: transcoder
+  namespace: streaming-poc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: transcoder
+  template:
+    metadata:
+      labels:
+        app: transcoder
+    spec:
+      containers:
+      - name: transcoder
+        image: alfg/nginx-rtmp:latest
+        ports:
+        - containerPort: 1935
+          name: rtmp
+        - containerPort: 8080
+          name: http
+        volumeMounts:
+        - name: transcoder-config
+          mountPath: /etc/nginx/nginx.conf
+          subPath: nginx.conf
+        - name: hls-temp
+          mountPath: /tmp/hls
+        resources:
+          requests:
+            memory: "1Gi"
+            cpu: "1000m"
+          limits:
+            memory: "2Gi"
+            cpu: "2000m"
+      volumes:
+      - name: transcoder-config
+        configMap:
+          name: transcoder-config
+      - name: hls-temp
+        emptyDir: {}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: transcoder
+  namespace: streaming-poc
+spec:
+  selector:
+    app: transcoder
+  ports:
+  - port: 1935
+    targetPort: 1935
+    name: rtmp
+  - port: 8080
+    targetPort: 8080
+    name: http

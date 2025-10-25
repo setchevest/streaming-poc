@@ -1,0 +1,84 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-config
+  namespace: streaming-poc
+data:
+  DB_HOST: "postgres"
+  DB_PORT: "5432"
+  DB_NAME: "streaming"
+  DB_USER: "streamuser"
+  S3_ENDPOINT: "http://minio:9000"
+  S3_ACCESS_KEY: "minioadmin"
+  PUBLIC_HOST: "your-homelab-ip" # Cambiar por tu IP
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: api-secret
+  namespace: streaming-poc
+type: Opaque
+stringData:
+  DB_PASSWORD: "changeme123"
+  S3_SECRET_KEY: "minioadmin123"
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: streaming-api
+  namespace: streaming-poc
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: streaming-api
+  template:
+    metadata:
+      labels:
+        app: streaming-api
+    spec:
+      containers:
+      - name: api
+        image: streaming-api:latest # Construir con: docker build -t streaming-api:latest .
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 3000
+          name: http
+        envFrom:
+        - configMapRef:
+            name: api-config
+        - secretRef:
+            name: api-secret
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 10
+          periodSeconds: 30
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: 3000
+          initialDelaySeconds: 5
+          periodSeconds: 10
+        resources:
+          requests:
+            memory: "256Mi"
+            cpu: "250m"
+          limits:
+            memory: "512Mi"
+            cpu: "500m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: streaming-api
+  namespace: streaming-poc
+spec:
+  selector:
+    app: streaming-api
+  ports:
+  - port: 3000
+    targetPort: 3000
+    name: http
+  type: ClusterIP

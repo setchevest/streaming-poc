@@ -1,0 +1,123 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: streaming-postgres
+    environment:
+      POSTGRES_DB: streaming
+      POSTGRES_USER: streamuser
+      POSTGRES_PASSWORD: changeme123
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - streaming-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U streamuser"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # MinIO S3-compatible storage
+  minio:
+    image: minio/minio:latest
+    container_name: streaming-minio
+    command: server /data --console-address ":9001"
+    environment:
+      MINIO_ROOT_USER: minioadmin
+      MINIO_ROOT_PASSWORD: minioadmin123
+    volumes:
+      - minio_data:/data
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    networks:
+      - streaming-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:9000/minio/health/live"]
+      interval: 30s
+      timeout: 20s
+      retries: 3
+
+  # nginx-rtmp for RTMP ingestion
+  nginx-rtmp:
+    image: alfg/nginx-rtmp:latest
+    container_name: streaming-nginx-rtmp
+    ports:
+      - "1935:1935"
+      - "8080:8080"
+    volumes:
+      - ./nginx-rtmp.conf:/etc/nginx/nginx.conf:ro
+    networks:
+      - streaming-network
+    depends_on:
+      - streaming-api
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Transcoder with HLS output
+  transcoder:
+    image: alfg/nginx-rtmp:latest
+    container_name: streaming-transcoder
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./transcoder.conf:/etc/nginx/nginx.conf:ro
+      - hls_temp:/tmp/hls
+    networks:
+      - streaming-network
+    depends_on:
+      - streaming-api
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Backend API
+  streaming-api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: streaming-api
+    environment:
+      PORT: 3000
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: streaming
+      DB_USER: streamuser
+      DB_PASSWORD: changeme123
+      S3_ENDPOINT: http://minio:9000
+      S3_ACCESS_KEY: minioadmin
+      S3_SECRET_KEY: minioadmin123
+      PUBLIC_HOST: localhost
+    ports:
+      - "3000:3000"
+    networks:
+      - streaming-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      minio:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  minio_data:
+  hls_temp:
+
+networks:
+  streaming-network:
+    driver: bridge
