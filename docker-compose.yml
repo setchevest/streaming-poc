@@ -16,7 +16,7 @@ services:
     networks:
       - streaming-network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U streamuser"]
+      test: ["CMD-SHELL", "pg_isready -U streamuser -d streaming"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -47,10 +47,11 @@ services:
     image: alfg/nginx-rtmp:latest
     container_name: streaming-nginx-rtmp
     ports:
-      - "1935:1935"
+      - "31935:1935"
       - "8080:8080"
     volumes:
-      - ./nginx-rtmp.conf:/etc/nginx/nginx.conf:ro
+      - ./nginx-rtmp.conf:/tmp/nginx.conf:ro
+    command: nginx -c /tmp/nginx.conf -g "daemon off;"
     networks:
       - streaming-network
     depends_on:
@@ -68,8 +69,9 @@ services:
     ports:
       - "8081:8080"
     volumes:
-      - ./transcoder.conf:/etc/nginx/nginx.conf:ro
+      - ./transcoder.conf:/tmp/nginx.conf:ro
       - hls_temp:/tmp/hls
+    command: nginx -c /tmp/nginx.conf -g "daemon off;"
     networks:
       - streaming-network
     depends_on:
@@ -97,6 +99,7 @@ services:
       S3_ACCESS_KEY: minioadmin
       S3_SECRET_KEY: minioadmin123
       PUBLIC_HOST: localhost
+      HLS_PORT: 8081
     ports:
       - "3000:3000"
     networks:

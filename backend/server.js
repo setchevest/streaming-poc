@@ -189,13 +189,17 @@ app.post('/api/transcode/start', async (req, res) => {
     const streamKey = req.body.name;
     console.log('🎬 Transcoding started for:', streamKey);
 
-    const hlsUrl = `http://transcoder:8080/hls/${streamKey}.m3u8`;
+    // Use public HLS URL that the browser can access
+    const publicHost = process.env.PUBLIC_HOST || 'localhost';
+    const hlsPort = process.env.HLS_PORT || '8081';
+    const hlsUrl = `http://${publicHost}:${hlsPort}/hls/${streamKey}.m3u8`;
 
     await pool.query(
       'UPDATE events SET hls_url = $1 WHERE stream_key = $2',
       [hlsUrl, streamKey]
     );
 
+    console.log('✅ HLS URL configured:', hlsUrl);
     res.status(200).send('OK');
   } catch (err) {
     console.error('Error in transcode start:', err);
