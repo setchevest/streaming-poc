@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Quick Start Script - Docker Compose Version
-# Para desarrollo local sin Kubernetes
+# For local development without Kubernetes
 
 set -e
 
@@ -20,38 +20,38 @@ echo "╚═══════════════════════�
 echo -e "${NC}"
 
 # Check prerequisites
-echo -e "${YELLOW}Verificando prerequisitos...${NC}"
+echo -e "${YELLOW}Checking prerequisites...${NC}"
 
 if ! command -v docker &> /dev/null; then
-    echo -e "${RED}❌ Docker no está instalado${NC}"
+    echo -e "${RED}❌ Docker is not installed${NC}"
     exit 1
 fi
 
 if ! command -v docker-compose &> /dev/null; then
-    echo -e "${RED}❌ Docker Compose no está instalado${NC}"
+    echo -e "${RED}❌ Docker Compose is not installed${NC}"
     exit 1
 fi
 
-echo -e "${GREEN}✅ Docker y Docker Compose encontrados${NC}"
+echo -e "${GREEN}✅ Docker and Docker Compose found${NC}"
 
 # Create directory structure
 echo ""
-echo -e "${YELLOW}Creando estructura de directorios...${NC}"
+echo -e "${YELLOW}Creating directory structure...${NC}"
 mkdir -p backend frontend
 
 # Stop any existing containers
 echo ""
-echo -e "${YELLOW}Deteniendo contenedores existentes...${NC}"
+echo -e "${YELLOW}Stopping existing containers...${NC}"
 docker-compose down 2>/dev/null || true
 
 # Build and start services
 echo ""
-echo -e "${YELLOW}Construyendo e iniciando servicios...${NC}"
+echo -e "${YELLOW}Building and starting services...${NC}"
 docker-compose up -d --build
 
 # Wait for services to be healthy
 echo ""
-echo -e "${YELLOW}Esperando a que los servicios estén listos...${NC}"
+echo -e "${YELLOW}Waiting for services to be ready...${NC}"
 
 echo -n "PostgreSQL"
 until docker-compose exec -T postgres pg_isready -U streamuser &>/dev/null; do
@@ -95,18 +95,18 @@ LOCAL_IP=$(hostname -I | awk '{print $1}' 2>/dev/null || echo "localhost")
 echo ""
 echo -e "${GREEN}"
 echo "╔═══════════════════════════════════════════════╗"
-echo "║   ✅ ¡Todos los servicios están listos!      ║"
+echo "║   ✅ All services are ready!                 ║"
 echo "╚═══════════════════════════════════════════════╝"
 echo -e "${NC}"
 
 echo ""
-echo -e "${BLUE}📊 Servicios Disponibles:${NC}"
+echo -e "${BLUE}📊 Available Services:${NC}"
 echo ""
 echo -e "  ${GREEN}API Backend:${NC}"
 echo -e "    http://localhost:3000"
 echo -e "    http://${LOCAL_IP}:3000"
 echo ""
-echo -e "  ${GREEN}RTMP Server (para OBS):${NC}"
+echo -e "  ${GREEN}RTMP Server (for OBS):${NC}"
 echo -e "    rtmp://localhost:1935/live"
 echo -e "    rtmp://${LOCAL_IP}:1935/live"
 echo ""
@@ -121,31 +121,31 @@ echo -e "  ${GREEN}nginx-rtmp Stats:${NC}"
 echo -e "    http://localhost:8080/stat"
 echo ""
 
-echo -e "${BLUE}📝 Próximos Pasos:${NC}"
+echo -e "${BLUE}📝 Next Steps:${NC}"
 echo ""
-echo "1. Configura el frontend:"
+echo "1. Configure the frontend:"
 echo -e "   ${YELLOW}cd frontend${NC}"
 echo -e "   ${YELLOW}npm install${NC}"
 echo -e "   ${YELLOW}echo 'NEXT_PUBLIC_API_URL=http://localhost:3000' > .env.local${NC}"
 echo -e "   ${YELLOW}npm run dev${NC}"
 echo ""
-echo "2. Crea un evento en: http://localhost:3001"
+echo "2. Create an event at: http://localhost:3001"
 echo ""
-echo "3. Configura OBS:"
-echo "   - Servidor: rtmp://${LOCAL_IP}:1935/live"
-echo "   - Clave: <usa la stream key del evento creado>"
+echo "3. Configure OBS:"
+echo "   - Server: rtmp://${LOCAL_IP}:1935/live"
+echo "   - Key: <use the stream key from the created event>"
 echo ""
-echo "4. ¡Comienza a transmitir!"
-echo ""
-
-echo -e "${BLUE}🔧 Comandos Útiles:${NC}"
-echo ""
-echo -e "  Ver logs:        ${YELLOW}docker-compose logs -f${NC}"
-echo -e "  Ver logs API:    ${YELLOW}docker-compose logs -f streaming-api${NC}"
-echo -e "  Detener:         ${YELLOW}docker-compose down${NC}"
-echo -e "  Reiniciar:       ${YELLOW}docker-compose restart${NC}"
-echo -e "  Ver estado:      ${YELLOW}docker-compose ps${NC}"
+echo "4. Start streaming!"
 echo ""
 
-echo -e "${GREEN}¡Listo para transmitir! 🎉${NC}"
+echo -e "${BLUE}🔧 Useful Commands:${NC}"
+echo ""
+echo -e "  View logs:        ${YELLOW}docker-compose logs -f${NC}"
+echo -e "  View API logs:    ${YELLOW}docker-compose logs -f streaming-api${NC}"
+echo -e "  Stop:             ${YELLOW}docker-compose down${NC}"
+echo -e "  Restart:          ${YELLOW}docker-compose restart${NC}"
+echo -e "  View status:      ${YELLOW}docker-compose ps${NC}"
+echo ""
+
+echo -e "${GREEN}Ready to stream! 🎉${NC}"
 echo ""
