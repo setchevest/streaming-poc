@@ -152,6 +152,49 @@ This workflow guides you through:
 
 The workflow ensures consistency with existing patterns, proper error handling, accessibility compliance, and thorough documentation.
 
+## Git Workflow
+
+### Branch Strategy
+- Always create a feature branch for new work (do not commit directly to `main`)
+- Branch naming convention:
+  - `feature/` for new features (e.g., `feature/event-search`)
+  - `fix/` for bug fixes (e.g., `fix/rtmp-auth-bug`)
+  - `refactor/` for refactoring (e.g., `refactor/api-middleware`)
+  - `docs/` for documentation updates (e.g., `docs/api-endpoints`)
+- Branch names should be lowercase, hyphen-separated, and descriptive
+
+### Commit Messages
+- Follow [Conventional Commits](https://www.conventionalcommits.org/) format
+- Format: `type(scope): description`
+- **Types**:
+  - `feat`: A new feature
+  - `fix`: A bug fix
+  - `refactor`: Code refactoring without feature changes or bug fixes
+  - `docs`: Documentation updates
+  - `test`: Adding or updating tests
+  - `perf`: Performance improvements
+  - `style`: Code style changes (formatting, missing semicolons, etc.)
+  - `chore`: Build, dependencies, or tooling changes
+- **Scope**: The affected component/area (e.g., `streaming`, `api`, `ui`, `frontend`, `database`, `transcoder`)
+- **Description**: Keep concise (50 chars or less), imperative mood, lowercase, no period at end
+- Examples:
+  - `feat(streaming): add multi-bitrate HLS support`
+  - `fix(api): resolve stream key validation issue`
+  - `refactor(frontend): extract video player to separate component`
+  - `docs(readme): update deployment instructions`
+
+### Pull Request Process
+1. Create a feature branch from `main`
+2. Make commits following conventional commit format
+3. Keep commits atomic and logically separated
+4. Push to remote and create a pull request
+5. Include a clear description of changes in the PR
+6. Ensure all tests pass and CI checks succeed
+7. Request review from team members
+8. Address feedback and push updates
+9. Squash commits if necessary before merging
+10. Merge via squash-and-merge or regular merge (depending on team preference)
+
 ## Key Workflows
 
 ### RTMP Stream Lifecycle
