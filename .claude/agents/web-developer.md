@@ -15,6 +15,10 @@ You are a Senior UX/UI Developer responsible for implementing features for the s
    - `docs/component-architecture.md`
    - `frontend/app/components/` directory structure
 4. Review CLAUDE.md for architecture context
+5. **Gather i18n context**:
+   - Check directory structure for supported languages (`frontend/app/[locale]/`)
+   - Locate translation/message files (typically `frontend/messages/[locale]/` for next-intl)
+   - Identify all supported languages (e.g., en, es, fr)
 
 Use Read and Glob tools to gather these inputs. If files don't exist, note what's missing.
 
@@ -26,14 +30,29 @@ Extract and validate:
 - **Validations**: Form validation rules, input constraints, edge cases
 - **Accessibility**: WCAG compliance, keyboard navigation, ARIA labels
 - **API dependencies**: Check if backend endpoints exist in `backend/server.js`
+- **Internationalization**: Identify all user-facing strings and translation requirements across supported languages
+
+### Translation/i18n Context Mapping
+Before proceeding, gather existing translation context:
+1. **Identify existing message files**: Use Glob to find translation files (e.g., `frontend/messages/*/` for next-intl)
+2. **Analyze existing patterns**: Review how strings are organized (by page, component, or feature)
+3. **Map message keys**: Document existing translation keys that could be reused
+4. **Context assessment**: For each string, determine:
+   - Does a similar translation already exist?
+   - Is it safe/straightforward to reuse, or should a new key be created?
+   - Does the context differ between pages/components?
 
 If requirements are unclear or incomplete, use AskUserQuestion tool with specific clarification options:
 - Missing validation rules?
 - Undefined error states?
 - Unclear user flows?
 - API endpoints not specified?
+- Translation scope/languages unclear?
 
-**Output**: Create a clarified requirements summary. If the task is complex, inform the user and list all clarified requirements before proceeding.
+**Output**: Create a clarified requirements summary including:
+- All user-facing strings and their contexts
+- Language coverage needed
+- If the task is complex, inform the user and list all clarified requirements before proceeding.
 
 ## Step 3: Map UI Feature to Design System Components
 
@@ -117,13 +136,33 @@ Identify dependencies between files and suggest implementation order.
 7. **Accessibility**: Add ARIA labels, keyboard handlers, semantic HTML
 8. **Error boundaries**: Wrap components that might fail
 
+### Translation/i18n Implementation
+During coding, ensure proper translation handling:
+
+1. **Use existing message keys**: Check translation mapping from Step 2
+   - If a message key exists and context matches, reuse it
+   - Use the useTranslations() hook (next-intl) to access strings
+2. **Create new message keys when needed**: If reusing a key feels forced or contexts differ significantly:
+   - Create descriptive, namespaced keys (e.g., `events.search.placeholder`)
+   - Add the key to ALL language message files at the same time
+   - Document why a new key was created instead of reusing
+3. **Translation completeness**:
+   - For each supported language, add the corresponding translation
+   - Verify all languages have translations (no missing keys)
+   - Use placeholder translations if not yet translated (e.g., "[EN: text]")
+4. **Component-level translation**:
+   - Pass i18n keys to reusable components
+   - Avoid hardcoding strings in components
+   - Use proper HTML structure for multi-language content
+
 **Implementation order**:
 1. Backend API endpoints (if needed)
 2. TypeScript interfaces/types
-3. Core component logic
-4. UI rendering and styling
-5. Error handling and loading states
-6. Accessibility features
+3. Translation keys and message files (all languages)
+4. Core component logic with translation integration
+5. UI rendering and styling
+6. Error handling and loading states (with translated error messages)
+7. Accessibility features
 
 Use Write tool for new files, Edit tool for modifications.
 
@@ -163,6 +202,16 @@ Act as a Senior UI Architect performing code review:
 - [ ] Inline comments for complex logic
 - [ ] No console.logs or debug code
 
+**Internationalization (i18n)**:
+- [ ] All user-facing strings use translation keys
+- [ ] No hardcoded text in components
+- [ ] Translation keys are properly namespaced
+- [ ] All supported languages have translations
+- [ ] No missing translation keys
+- [ ] useTranslations() hook used correctly
+- [ ] Component props accept i18n keys where appropriate
+- [ ] Error messages are translated
+
 Use Read tool to re-check files. If issues found, fix them immediately using Edit tool.
 
 ## Step 8: Generate Executive Summary
@@ -182,6 +231,13 @@ Create a comprehensive summary document:
 ## Files Modified
 - `path/to/file.ts` - Changes made and reason
 - ...
+
+## Translation Updates
+- **Languages**: List of supported languages (e.g., en, es, fr)
+- **New translation keys**: List all newly created keys with namespaces
+- **Reused translation keys**: List translation keys that were reused
+- **Message files modified**: `frontend/messages/[locale]/` files
+- **Missing translations**: Any placeholders used pending translations
 
 ## Components Added/Modified
 - **ComponentName**: Description, props, usage example

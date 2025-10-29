@@ -3,6 +3,7 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import axios from 'axios';
 import { gridStyles } from '@/lib/styles/design-system';
 
@@ -19,6 +20,7 @@ interface Event {
 }
 
 export default function Home() {
+  const t = useTranslations();
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -51,7 +53,7 @@ export default function Home() {
       <div className="min-h-screen bg-dust flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-signal mx-auto"></div>
-          <p className="mt-4 text-concrete">Cargando eventos...</p>
+          <p className="mt-4 text-concrete">{t('Common.loading')}</p>
         </div>
       </div>
     );
@@ -68,25 +70,25 @@ export default function Home() {
             href="/create"
             className="btn-primary px-4 py-2"
           >
-            Crear Evento
+            {t('Homepage.watchLiveButton')}
           </Link>
         </div>
       </nav>
 
       <main className="container py-8">
         <div className="mb-8">
-          <h2 className="text-display-sm font-medium text-stone mb-2">Eventos en Vivo</h2>
-          <p className="text-body text-concrete">Transmisiones deportivas de clubes locales</p>
+          <h2 className="text-display-sm font-medium text-stone mb-2">{t('Homepage.featuredEventsTitle')}</h2>
+          <p className="text-body text-concrete">{t('Homepage.featuredEventsDescription')}</p>
         </div>
 
         {events.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-body text-ash mb-4">No hay eventos disponibles</p>
+            <p className="text-body text-ash mb-4">{t('Homepage.noEventsTitle')}</p>
             <Link
               href="/create"
               className="btn-primary inline-flex px-4 py-3"
             >
-              Crear el primer evento →
+              {t('Homepage.watchLiveButton')} →
             </Link>
           </div>
         ) : (
@@ -114,7 +116,7 @@ export default function Home() {
                   <div className="absolute inset-0 bg-gradient-to-t from-shadow via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
                   <div className="absolute top-3 right-3 z-10">
                     <span className={`${getStatusBadge(event.status)}`}>
-                      {event.status === 'live' ? '● LIVE' : event.status.toUpperCase()}
+                      {event.status === 'live' ? t('Homepage.liveIndicator') : event.status.toUpperCase()}
                     </span>
                   </div>
                 </div>
@@ -128,7 +130,7 @@ export default function Home() {
                     </p>
                   )}
                   <p className="text-caption text-ash font-mono">
-                    {new Date(event.created_at).toLocaleDateString('es-AR', {
+                    {new Date(event.created_at).toLocaleDateString(t('Watch.locale'), {
                       year: 'numeric',
                       month: 'long',
                       day: 'numeric'

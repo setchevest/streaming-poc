@@ -5,12 +5,13 @@ import './globals.css';
 export const metadata = {
   title: 'Streaming Platform - Live Sports Events',
   description: 'Watch live sports events with real-time streaming and analytics',
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-  },
 }
+
+export const generateViewport = () => ({
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+})
 
 export default async function RootLayout({
   children,

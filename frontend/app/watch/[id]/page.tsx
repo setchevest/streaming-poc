@@ -3,6 +3,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import axios from 'axios';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
@@ -26,6 +27,7 @@ interface Event {
 
 export default function WatchPage() {
   const params = useParams();
+  const t = useTranslations();
   const [event, setEvent] = useState<Event | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -46,7 +48,7 @@ export default function WatchPage() {
       setError('');
     } catch (err) {
       console.error('Error fetching event:', err);
-      setError('Error al cargar el evento');
+      setError(t('Watch.errorLoading'));
     } finally {
       setLoading(false);
     }
@@ -57,7 +59,7 @@ export default function WatchPage() {
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-white mx-auto"></div>
-          <p className="mt-4 text-white">Cargando stream...</p>
+          <p className="mt-4 text-white">{t('Watch.loadingStream')}</p>
         </div>
       </div>
     );
@@ -67,9 +69,9 @@ export default function WatchPage() {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-red-400 text-xl mb-4">{error || 'Evento no encontrado'}</p>
+          <p className="text-red-400 text-xl mb-4">{error || t('Watch.eventNotFound')}</p>
           <Link href="/" className="text-blue-400 hover:text-blue-300">
-            ← Volver al inicio
+            {t('Watch.backHome')}
           </Link>
         </div>
       </div>
@@ -82,7 +84,7 @@ export default function WatchPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center h-16">
             <Link href="/" className="text-white hover:text-gray-300">
-              ← Volver
+              {t('Common.back')}
             </Link>
           </div>
         </div>
@@ -94,7 +96,7 @@ export default function WatchPage() {
           <div className="lg:col-span-2">
             <div className="bg-black rounded-lg overflow-hidden shadow-2xl">
               {event.status === 'live' && event.hls_url ? (
-                <VideoPlayer 
+                <VideoPlayer
                   streamUrl={event.hls_url}
                   autoplay={true}
                 />
@@ -104,8 +106,8 @@ export default function WatchPage() {
                     <svg className="w-16 h-16 mx-auto mb-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <p className="text-xl font-semibold">Transmisión Programada</p>
-                    <p className="text-gray-400 mt-2">El evento aún no ha comenzado</p>
+                    <p className="text-xl font-semibold">{t('Watch.scheduledTitle')}</p>
+                    <p className="text-gray-400 mt-2">{t('Watch.scheduledDescription')}</p>
                   </div>
                 </div>
               ) : (
@@ -114,8 +116,8 @@ export default function WatchPage() {
                     <svg className="w-16 h-16 mx-auto mb-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.636 18.364a9 9 0 010-12.728m12.728 0a9 9 0 010 12.728m-9.9-2.829a5 5 0 010-7.07m7.072 0a5 5 0 010 7.07M13 12a1 1 0 11-2 0 1 1 0 012 0z" />
                     </svg>
-                    <p className="text-xl font-semibold">Transmisión Finalizada</p>
-                    <p className="text-gray-400 mt-2">Este evento ya terminó</p>
+                    <p className="text-xl font-semibold">{t('Watch.endedTitle')}</p>
+                    <p className="text-gray-400 mt-2">{t('Watch.endedDescription')}</p>
                   </div>
                 </div>
               )}
@@ -127,7 +129,7 @@ export default function WatchPage() {
                 <h1 className="text-3xl font-bold text-white">{event.title}</h1>
                 {event.status === 'live' && (
                   <span className="px-3 py-1 bg-red-500 text-white rounded-full text-sm font-semibold uppercase animate-pulse">
-                    ● EN VIVO
+                    {t('Watch.liveStatus')}
                   </span>
                 )}
               </div>
@@ -136,7 +138,7 @@ export default function WatchPage() {
               )}
               {event.started_at && (
                 <p className="text-gray-500 text-sm mt-2">
-                  Inicio: {new Date(event.started_at).toLocaleString('es-AR')}
+                  {t('Watch.startTime')} {new Date(event.started_at).toLocaleString(t('Watch.locale'))}
                 </p>
               )}
             </div>
@@ -153,19 +155,19 @@ export default function WatchPage() {
 
             {/* Event Information */}
             <div className="bg-gray-800 rounded-lg p-6 shadow-lg">
-              <h3 className="text-xl font-semibold text-white mb-4">Información</h3>
+              <h3 className="text-xl font-semibold text-white mb-4">{t('Watch.information')}</h3>
               <div className="space-y-4 text-gray-300">
                 <div>
-                  <p className="text-sm text-gray-500">Estado</p>
+                  <p className="text-sm text-gray-500">{t('Watch.status')}</p>
                   <p className="font-semibold capitalize">{event.status}</p>
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500">ID del Evento</p>
+                  <p className="text-sm text-gray-500">{t('Watch.eventId')}</p>
                   <p className="font-mono text-sm">{event.id}</p>
                 </div>
                 {event.hls_url && (
                   <div>
-                    <p className="text-sm text-gray-500">URL de Stream</p>
+                    <p className="text-sm text-gray-500">{t('Watch.streamUrl')}</p>
                     <p className="font-mono text-xs break-all bg-gray-900 p-2 rounded">
                       {event.hls_url}
                     </p>
@@ -175,7 +177,7 @@ export default function WatchPage() {
 
               {/* Coming soon: Chat */}
               <div className="mt-8 p-4 bg-gray-900 rounded text-center">
-                <p className="text-gray-500 text-sm">Chat en vivo próximamente</p>
+                <p className="text-gray-500 text-sm">{t('Watch.liveChatComingSoon')}</p>
               </div>
             </div>
           </div>

@@ -136,11 +136,7 @@ telnet localhost 1935
 
 ### UI/UX Feature Implementation
 
-For implementing new UI features following design system principles and best practices, use the slash command:
-
-```bash
-/ui-feature
-```
+For implementing new UI features following design system principles and best practices, use the agent web-developer:
 
 This workflow guides you through:
 1. **Requirements gathering** - Read specs and design system docs
