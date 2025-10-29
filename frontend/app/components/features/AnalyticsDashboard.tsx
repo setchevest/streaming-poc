@@ -1,48 +1,27 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
-import axios from 'axios';
+import { useState } from 'react';
 import StatisticItem from './StatisticItem';
 import { StreamAnalytics, StatisticItem as StatisticItemType, TIME_RANGES } from '@/lib/types/statistics';
+import { useEventAnalytics } from '@/lib/api/hooks';
 
 interface Props {
   eventId: number;
   eventTitle?: string;
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-
 export default function AnalyticsDashboard({ eventId, eventTitle }: Props) {
-  const [analytics, setAnalytics] = useState<StreamAnalytics | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
   const [selectedTimeRange, setSelectedTimeRange] = useState(24); // hours
 
-  const fetchAnalytics = useCallback(async () => {
-    try {
-      setError(null);
-      const response = await axios.get(
-        `${API_URL}/api/events/${eventId}/analytics`,
-        {
-          params: { hours: selectedTimeRange },
-        }
-      );
-
-      if (response.data.analytics) {
-        setAnalytics(response.data.analytics);
-      }
-    } catch (err) {
-      console.error('Error fetching analytics:', err);
-      setError('Unable to load analytics data');
-    } finally {
-      setLoading(false);
-    }
-  }, [eventId, selectedTimeRange]);
-
-  useEffect(() => {
-    setLoading(true);
-    fetchAnalytics();
-  }, [selectedTimeRange, fetchAnalytics]);
+  // Use React Query hook for analytics
+  const {
+    data: analytics,
+    isLoading: loading,
+    error,
+    refetch: fetchAnalytics,
+  } = useEventAnalytics(eventId, selectedTimeRange, {
+    enabled: true,
+  });
 
   const getAnalyticsItems = (): StatisticItemType[] => {
     if (!analytics) return [];

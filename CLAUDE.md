@@ -76,7 +76,7 @@ npm run dev
 cd frontend
 npm install
 echo "NEXT_PUBLIC_API_URL=http://localhost:8000" > .env.local
-npm run dev  # Runs on port 3001
+npm run dev  # Runs on port 3000
 
 # Frontend debug mode
 npm run debug
@@ -222,7 +222,7 @@ The workflow ensures consistency with existing patterns, proper error handling, 
 - Frontend uses Next.js App Router with internationalization (`frontend/app/[locale]/`)
 - Kubernetes manifests have typo in filename: `api-deployment.yaml`
 - HLS segments are stored in ephemeral volumes (`emptyDir`) - not persistent by default
-- Frontend runs on port 3001 (Next.js default + 1) to avoid conflicts
+- Frontend runs on port 3000 (Next.js default)
 
 ## Extension Points
 

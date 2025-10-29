@@ -1,6 +1,7 @@
-// API helper functions for homepage data fetching
+// API helper functions for homepage data fetching (Server-side)
+// For client-side, use the React Query hooks from ./hooks.ts
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000';
+import { apiClient } from './client';
 
 export interface Event {
   id: number;
@@ -25,11 +26,9 @@ export interface SportCategory {
  */
 export async function fetchAllEvents(limit?: number): Promise<Event[]> {
   try {
-    const response = await fetch(`${API_URL}/api/events`, {
-      next: { revalidate: 60 }, // ISR: revalidate every 60 seconds
+    const data = await apiClient.get<{ events: Event[] }>('/api/events', {
+      next: { revalidate: 60 } as any, // ISR: revalidate every 60 seconds
     });
-    if (!response.ok) throw new Error('Failed to fetch events');
-    const data = await response.json();
     return data.events || [];
   } catch (error) {
     console.error('Error fetching events:', error);
@@ -42,11 +41,10 @@ export async function fetchAllEvents(limit?: number): Promise<Event[]> {
  */
 export async function fetchLiveStreams(): Promise<Event[]> {
   try {
-    const response = await fetch(`${API_URL}/api/events?status=live`, {
-      next: { revalidate: 10 }, // More frequent revalidation for live content
+    const data = await apiClient.get<{ events: Event[] }>('/api/events', {
+      params: { status: 'live' },
+      next: { revalidate: 10 } as any, // More frequent revalidation for live content
     });
-    if (!response.ok) throw new Error('Failed to fetch live streams');
-    const data = await response.json();
     return data.events?.filter((e: Event) => e.status === 'live') || [];
   } catch (error) {
     console.error('Error fetching live streams:', error);
@@ -59,11 +57,10 @@ export async function fetchLiveStreams(): Promise<Event[]> {
  */
 export async function fetchFeaturedEvents(): Promise<Event[]> {
   try {
-    const response = await fetch(`${API_URL}/api/events?featured=true`, {
-      next: { revalidate: 60 },
+    const data = await apiClient.get<{ events: Event[] }>('/api/events', {
+      params: { featured: true },
+      next: { revalidate: 60 } as any,
     });
-    if (!response.ok) throw new Error('Failed to fetch featured events');
-    const data = await response.json();
     // Return up to 3 featured events
     return (data.events || []).slice(0, 3);
   } catch (error) {
@@ -77,11 +74,10 @@ export async function fetchFeaturedEvents(): Promise<Event[]> {
  */
 export async function fetchUpcomingEvents(limit: number = 6): Promise<Event[]> {
   try {
-    const response = await fetch(`${API_URL}/api/events?status=scheduled&sort=date`, {
-      next: { revalidate: 60 },
+    const data = await apiClient.get<{ events: Event[] }>('/api/events', {
+      params: { status: 'scheduled', sort: 'date' },
+      next: { revalidate: 60 } as any,
     });
-    if (!response.ok) throw new Error('Failed to fetch upcoming events');
-    const data = await response.json();
     return (data.events || []).slice(0, limit);
   } catch (error) {
     console.error('Error fetching upcoming events:', error);
@@ -94,11 +90,9 @@ export async function fetchUpcomingEvents(limit: number = 6): Promise<Event[]> {
  */
 export async function fetchSportCategories(): Promise<SportCategory[]> {
   try {
-    const response = await fetch(`${API_URL}/api/categories`, {
-      next: { revalidate: 3600 }, // Cache for 1 hour (static data)
+    const data = await apiClient.get<{ categories: SportCategory[] }>('/api/categories', {
+      next: { revalidate: 3600 } as any, // Cache for 1 hour (static data)
     });
-    if (!response.ok) throw new Error('Failed to fetch categories');
-    const data = await response.json();
     return data.categories || [];
   } catch (error) {
     console.error('Error fetching sport categories:', error);
@@ -116,6 +110,5 @@ function getDefaultCategories(): SportCategory[] {
     { id: '3', name: 'Tennis', slug: 'tennis', icon: '🎾' },
     { id: '4', name: 'Volleyball', slug: 'volleyball', icon: '🏐' },
     { id: '5', name: 'Rugby', slug: 'rugby', icon: '🏉' },
-    { id: '6', name: 'Cricket', slug: 'cricket', icon: '🏏' },
   ];
 }

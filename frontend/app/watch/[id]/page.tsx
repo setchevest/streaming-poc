@@ -1,58 +1,28 @@
 // app/watch/[id]/page.tsx
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import axios from 'axios';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import StatisticsPanel from '@/components/features/StatisticsPanel';
+import { useEvent } from '@/lib/api/hooks';
+import { QueryProvider } from '@/components/providers/QueryProvider';
 
 // Import VideoPlayer as client-only component
 const VideoPlayer = dynamic(() => import('@/components/VideoPlayer'), {
   ssr: false,
 });
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+// Force dynamic rendering - this page should not be pre-rendered
+export const dynamicParams = true;
 
-interface Event {
-  id: number;
-  title: string;
-  description: string;
-  status: string;
-  started_at: string;
-  hls_url: string;
-}
-
-export default function WatchPage() {
+function WatchPageContent() {
   const params = useParams();
   const t = useTranslations();
-  const [event, setEvent] = useState<Event | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
 
-  useEffect(() => {
-    if (params.id) {
-      fetchEvent();
-      // Poll for status updates every 10 seconds
-      const interval = setInterval(fetchEvent, 10000);
-      return () => clearInterval(interval);
-    }
-  }, [params.id]);
-
-  const fetchEvent = async () => {
-    try {
-      const response = await axios.get(`${API_URL}/api/events/${params.id}`);
-      setEvent(response.data.event);
-      setError('');
-    } catch (err) {
-      console.error('Error fetching event:', err);
-      setError(t('Watch.errorLoading'));
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Use React Query hook for event data with automatic polling
+  const { data: event, isLoading: loading, error } = useEvent(params.id as string);
 
   if (loading) {
     return (
@@ -65,17 +35,23 @@ export default function WatchPage() {
     );
   }
 
-  if (error || !event) {
+  if (error || (!loading && !event)) {
     return (
       <div className="min-h-screen bg-gray-900 flex items-center justify-center">
         <div className="text-center">
-          <p className="text-red-400 text-xl mb-4">{error || t('Watch.eventNotFound')}</p>
+          <p className="text-red-400 text-xl mb-4">
+            {error ? t('Watch.errorLoading') : t('Watch.eventNotFound')}
+          </p>
           <Link href="/" className="text-blue-400 hover:text-blue-300">
             {t('Watch.backHome')}
           </Link>
         </div>
       </div>
     );
+  }
+
+  if (!event) {
+    return null;
   }
 
   return (
@@ -184,5 +160,13 @@ export default function WatchPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function WatchPage() {
+  return (
+    <QueryProvider>
+      <WatchPageContent />
+    </QueryProvider>
   );
 }

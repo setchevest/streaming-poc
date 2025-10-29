@@ -1,85 +1,42 @@
 // app/[locale]/analytics/page.tsx
 'use client';
 
-import { useEffect, useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
-import axios from 'axios';
 import dynamic from 'next/dynamic';
 import { useTranslations } from 'next-intl';
+import { useEvents, useEvent } from '@/lib/api/hooks';
 
 const AnalyticsDashboard = dynamic(
   () => import('@/components/features/AnalyticsDashboard'),
   { ssr: false }
 );
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+// Force dynamic rendering - this page should not be pre-rendered
+export const dynamicParams = true;
 
-interface Event {
-  id: number;
-  title: string;
-  description: string;
-  status: string;
-  started_at: string;
-  ended_at?: string;
-  hls_url: string;
-}
-
-export default function AnalyticsPage() {
+function AnalyticsPageContent() {
   const t = useTranslations();
-  const router = useRouter();
   const searchParams = useSearchParams();
   const eventId = searchParams.get('event_id');
 
-  const [event, setEvent] = useState<Event | null>(null);
-  const [loading, setLoading] = useState(!!eventId);
-  const [error, setError] = useState<string | null>(null);
-  const [events, setEvents] = useState<Event[]>([]);
-  const [loadingEvents, setLoadingEvents] = useState(true);
-
   // Fetch available events for selection
-  useEffect(() => {
-    const fetchEvents = async () => {
-      try {
-        const response = await axios.get(`${API_URL}/api/events?limit=50`);
-        setEvents(response.data.events || []);
-      } catch (err) {
-        console.error('Error fetching events:', err);
-      } finally {
-        setLoadingEvents(false);
-      }
-    };
-
-    fetchEvents();
-  }, []);
+  const { data: events = [], isLoading: loadingEvents } = useEvents({ limit: 50 });
 
   // Fetch specific event details if event_id is provided
-  useEffect(() => {
-    if (!eventId) {
-      setLoading(false);
-      return;
-    }
-
-    const fetchEvent = async () => {
-      try {
-        setError(null);
-        const response = await axios.get(`${API_URL}/api/events/${eventId}`);
-        setEvent(response.data.event);
-      } catch (err) {
-        console.error('Error fetching event:', err);
-        setError('Unable to load event details');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchEvent();
-  }, [eventId]);
+  const {
+    data: event,
+    isLoading: loading,
+    error,
+  } = useEvent(eventId || '', {
+    enabled: !!eventId,
+  });
 
   const handleEventSelect = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const selectedId = e.target.value;
     if (selectedId) {
-      router.push(`/analytics?event_id=${selectedId}`);
+      window.location.href = `/analytics?event_id=${selectedId}`;
     }
   };
 
@@ -223,5 +180,13 @@ export default function AnalyticsPage() {
         </div>
       </section>
     </div>
+  );
+}
+
+export default function AnalyticsPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <AnalyticsPageContent />
+    </Suspense>
   );
 }

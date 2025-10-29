@@ -18,6 +18,9 @@ import { SportsCategories } from '@/components/features/SportsCategories';
  * - Featured events grid (3 columns)
  * - Upcoming events grid (4 columns)
  * - Sports categories browse section (6 columns)
+ *
+ * Note: This is a server component that doesn't use React Query
+ * For client-side pages, see app/page.tsx
  */
 export default async function HomePage() {
   const t = await getTranslations('Homepage');

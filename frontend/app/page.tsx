@@ -1,43 +1,20 @@
 // app/page.tsx
 'use client';
 
-import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import axios from 'axios';
 import { gridStyles } from '@/lib/styles/design-system';
+import { useEvents } from '@/lib/api/hooks';
+import { QueryProvider } from './components/providers/QueryProvider';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+// Force dynamic rendering - this page should not be pre-rendered
+export const dynamic = 'force-dynamic';
 
-interface Event {
-  id: number;
-  title: string;
-  description: string;
-  status: string;
-  started_at: string;
-  created_at: string;
-  thumbnail_url?: string;
-}
-
-export default function Home() {
+function HomeContent() {
   const t = useTranslations();
-  const [events, setEvents] = useState<Event[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    fetchEvents();
-  }, []);
-
-  const fetchEvents = async () => {
-    try {
-      const response = await axios.get(`${API_URL}/api/events`);
-      setEvents(response.data.events);
-    } catch (error) {
-      console.error('Error fetching events:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Use React Query hook for events
+  const { data: events = [], isLoading: loading } = useEvents();
 
   const getStatusBadge = (status: string) => {
     const badges = {
@@ -143,5 +120,13 @@ export default function Home() {
         )}
       </main>
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <QueryProvider>
+      <HomeContent />
+    </QueryProvider>
   );
 }

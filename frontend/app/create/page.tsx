@@ -4,36 +4,39 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
-import axios from 'axios';
 import Link from 'next/link';
 import { inputClassName, buttonClassName } from '@/lib/styles/design-system';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+import { useCreateEvent } from '@/lib/api/hooks';
+import type { CreateEventResponse } from '@/lib/api/types';
+import { QueryProvider } from '@/components/providers/QueryProvider';
 
 export default function CreateEventPage() {
-  const router = useRouter();
+  return (
+    <QueryProvider>
+      <CreateEventContent />
+    </QueryProvider>
+  );
+}
+
+function CreateEventContent() {
   const t = useTranslations();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const [createdEvent, setCreatedEvent] = useState<any>(null);
+  const [createdEvent, setCreatedEvent] = useState<CreateEventResponse | null>(null);
   const [formData, setFormData] = useState({
     title: '',
     description: ''
   });
 
+  // Use React Query mutation hook
+  const createEventMutation = useCreateEvent();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setError('');
 
     try {
-      const response = await axios.post(`${API_URL}/api/events`, formData);
-      setCreatedEvent(response.data);
+      const result = await createEventMutation.mutateAsync(formData);
+      setCreatedEvent(result);
     } catch (err: any) {
       console.error('Error creating event:', err);
-      setError(err.response?.data?.error || t('CreateEvent.errorCreating'));
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -159,9 +162,9 @@ export default function CreateEventPage() {
         <div className="card elevated p-8">
           <h2 className="text-display-sm font-medium text-stone mb-6">{t('CreateEvent.pageTitle')}</h2>
 
-          {error && (
+          {createEventMutation.isError && (
             <div className="bg-rust bg-opacity-10 border border-rust border-opacity-30 text-rust px-4 py-3 rounded-default mb-6">
-              {error}
+              {(createEventMutation.error as any)?.message || t('CreateEvent.errorCreating')}
             </div>
           )}
 
@@ -197,10 +200,10 @@ export default function CreateEventPage() {
 
             <button
               type="submit"
-              disabled={loading}
+              disabled={createEventMutation.isPending}
               className={buttonClassName('primary', 'md') + ' w-full justify-center'}
             >
-              {loading ? t('CreateEvent.creatingButton') : t('CreateEvent.createButton')}
+              {createEventMutation.isPending ? t('CreateEvent.creatingButton') : t('CreateEvent.createButton')}
             </button>
           </form>
         </div>

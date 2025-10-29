@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState, useCallback, useRef } from 'react';
-import axios from 'axios';
+import { useRef } from 'react';
 import StatisticItem from './StatisticItem';
 import { StreamStats, StatisticItem as StatisticItemType } from '@/lib/types/statistics';
+import { useEventStats } from '@/lib/api/hooks';
 
 interface Props {
   eventId: number;
@@ -11,61 +11,27 @@ interface Props {
   updateInterval?: number;
 }
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-
 export default function StatisticsPanel({
   eventId,
   isLive = false,
   updateInterval = 5000,
 }: Props) {
-  const [stats, setStats] = useState<StreamStats | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [isUpdating, setIsUpdating] = useState(false);
-  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
-  const intervalRef = useRef<NodeJS.Timeout | null>(null);
   const previousStatsRef = useRef<StreamStats | null>(null);
 
-  // Fetch current statistics
-  const fetchStats = useCallback(async () => {
-    try {
-      setError(null);
-      const response = await axios.get(`${API_URL}/api/events/${eventId}/stats`);
+  // Use React Query hook for stats with automatic polling
+  const {
+    data: stats,
+    isLoading: loading,
+    error,
+    dataUpdatedAt,
+    refetch: fetchStats,
+  } = useEventStats(eventId, {
+    enabled: true,
+    refetchInterval: isLive ? updateInterval : false,
+  });
 
-      if (response.data.stats) {
-        setStats(response.data.stats);
-        setLastUpdate(new Date());
-        setIsUpdating(false);
-      }
-    } catch (err) {
-      console.error('Error fetching stream stats:', err);
-      setError('Unable to load statistics');
-      setIsUpdating(false);
-    } finally {
-      setLoading(false);
-    }
-  }, [eventId]);
-
-  // Initialize stats and set up polling
-  useEffect(() => {
-    // Initial fetch
-    fetchStats();
-
-    // Only set up polling if stream is live
-    if (isLive) {
-      setIsUpdating(true);
-      intervalRef.current = setInterval(() => {
-        setIsUpdating(true);
-        fetchStats();
-      }, updateInterval);
-    }
-
-    return () => {
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-      }
-    };
-  }, [eventId, isLive, updateInterval, fetchStats]);
+  const lastUpdate = dataUpdatedAt ? new Date(dataUpdatedAt) : null;
+  const isUpdating = isLive;
 
   // Transform stats to displayable items
   const getStatisticItems = (): StatisticItemType[] => {
