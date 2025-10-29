@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 import { Event } from '@/lib/api/homepage';
-import { textStyles, cardClassName } from '@/app/lib/styles/design-system';
+import { textStyles, cardClassName } from '@/lib/styles/design-system';
 
 interface FeaturedEventsProps {
   events: Event[];

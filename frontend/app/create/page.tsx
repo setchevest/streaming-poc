@@ -5,7 +5,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import Link from 'next/link';
-import { inputClassName, buttonClassName } from '@/app/lib/styles/design-system';
+import { inputClassName, buttonClassName } from '@/lib/styles/design-system';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
