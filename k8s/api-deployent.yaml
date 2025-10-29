@@ -42,7 +42,7 @@ spec:
         image: streaming-api:latest # Construir con: docker build -t streaming-api:latest .
         imagePullPolicy: IfNotPresent
         ports:
-        - containerPort: 3000
+        - containerPort: 8000
           name: http
         envFrom:
         - configMapRef:
@@ -52,13 +52,13 @@ spec:
         livenessProbe:
           httpGet:
             path: /health
-            port: 3000
+            port: 8000
           initialDelaySeconds: 10
           periodSeconds: 30
         readinessProbe:
           httpGet:
             path: /health
-            port: 3000
+            port: 8000
           initialDelaySeconds: 5
           periodSeconds: 10
         resources:
@@ -78,7 +78,7 @@ spec:
   selector:
     app: streaming-api
   ports:
-  - port: 3000
-    targetPort: 3000
+  - port: 8000
+    targetPort: 8000
     name: http
   type: ClusterIP

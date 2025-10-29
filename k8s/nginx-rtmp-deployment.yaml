@@ -21,8 +21,8 @@ data:
           record off;
           
           # Notificar al backend cuando inicia un stream
-          on_publish http://streaming-api:3000/api/rtmp/auth;
-          on_publish_done http://streaming-api:3000/api/rtmp/done;
+          on_publish http://streaming-api:8000/api/rtmp/auth;
+          on_publish_done http://streaming-api:8000/api/rtmp/done;
           
           # Push to transcoder
           push rtmp://transcoder:1935/transcode;

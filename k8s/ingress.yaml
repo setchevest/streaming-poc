@@ -19,7 +19,7 @@ spec:
           service:
             name: streaming-api
             port:
-              number: 3000
+              number: 8000
       # HLS Streams
       - path: /hls
         pathType: Prefix

@@ -1,0 +1,33 @@
+{
+  "Navigation": {
+    "home": "Home",
+    "events": "Events",
+    "live": "Live",
+    "siteName": "StreamHub"
+  },
+  "Homepage": {
+    "pageTitle": "Sports Streaming Platform",
+    "pageDescription": "Watch live sports events and discover upcoming matches",
+    "watchLive": "Watch Now",
+    "watchLiveButton": "Watch Live",
+    "liveIndicator": "● LIVE",
+    "upcomingIndicator": "UPCOMING",
+    "featuredEventsTitle": "Featured Events",
+    "featuredEventsDescription": "Curated selection of premium sporting events",
+    "upcomingEventsTitle": "Upcoming Events",
+    "upcomingEventsDescription": "Browse all upcoming matches and competitions",
+    "browseByCategoryTitle": "Browse by Category",
+    "browseByCategoryDescription": "Find your favorite sports and events",
+    "viewAll": "View All",
+    "noEventsTitle": "No Events Available",
+    "noEventsDescription": "Check back soon for new sporting events"
+  },
+  "Events": {
+    "pageTitle": "Sports Events",
+    "noEventsFound": "No events found"
+  },
+  "Common": {
+    "loading": "Loading...",
+    "error": "An error occurred"
+  }
+}

@@ -8,7 +8,7 @@ const multer = require('multer');
 const crypto = require('crypto');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8000;
 
 // Middleware
 app.use(cors());
@@ -44,13 +44,22 @@ async function initDB() {
         stream_key VARCHAR(255) UNIQUE NOT NULL,
         title VARCHAR(255) NOT NULL,
         description TEXT,
+        sport VARCHAR(100),
         status VARCHAR(50) DEFAULT 'scheduled',
+        featured BOOLEAN DEFAULT FALSE,
         started_at TIMESTAMP,
         ended_at TIMESTAMP,
         hls_url TEXT,
         thumbnail_url TEXT,
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
+    `);
+
+    // Add missing columns to existing tables if they don't exist
+    await pool.query(`
+      ALTER TABLE events
+      ADD COLUMN IF NOT EXISTS sport VARCHAR(100),
+      ADD COLUMN IF NOT EXISTS featured BOOLEAN DEFAULT FALSE;
     `);
 
     await pool.query(`
@@ -60,6 +69,28 @@ async function initDB() {
         viewers INTEGER DEFAULT 0,
         timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
+    `);
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS categories (
+        id VARCHAR(50) PRIMARY KEY,
+        name VARCHAR(100) NOT NULL,
+        slug VARCHAR(100) UNIQUE NOT NULL,
+        icon VARCHAR(10) NOT NULL
+      );
+    `);
+
+    // Insert default sports categories
+    await pool.query(`
+      INSERT INTO categories (id, name, slug, icon)
+      VALUES
+        ('1', 'Football', 'football', '⚽'),
+        ('2', 'Basketball', 'basketball', '🏀'),
+        ('3', 'Tennis', 'tennis', '🎾'),
+        ('4', 'Volleyball', 'volleyball', '🏐'),
+        ('5', 'Rugby', 'rugby', '🏉'),
+        ('6', 'Cricket', 'cricket', '🏏')
+      ON CONFLICT (id) DO NOTHING;
     `);
 
     console.log('✅ Database initialized');
@@ -83,12 +114,12 @@ app.get('/health', (req, res) => {
 // Create new event
 app.post('/api/events', async (req, res) => {
   try {
-    const { title, description } = req.body;
+    const { title, description, sport, featured } = req.body;
     const streamKey = generateStreamKey();
 
     const result = await pool.query(
-      'INSERT INTO events (stream_key, title, description, status) VALUES ($1, $2, $3, $4) RETURNING *',
-      [streamKey, title, description, 'scheduled']
+      'INSERT INTO events (stream_key, title, description, sport, featured, status) VALUES ($1, $2, $3, $4, $5, $6) RETURNING *',
+      [streamKey, title, description, sport, featured || false, 'scheduled']
     );
 
     res.json({
@@ -103,12 +134,43 @@ app.post('/api/events', async (req, res) => {
   }
 });
 
-// Get all events
+// Get all events with optional filtering
 app.get('/api/events', async (req, res) => {
   try {
-    const result = await pool.query(
-      'SELECT * FROM events ORDER BY created_at DESC'
-    );
+    const { status, featured, sort, limit } = req.query;
+
+    let query = 'SELECT * FROM events WHERE 1=1';
+    const params = [];
+    let paramIndex = 1;
+
+    // Apply status filter
+    if (status) {
+      query += ` AND status = $${paramIndex}`;
+      params.push(status);
+      paramIndex++;
+    }
+
+    // Apply featured filter
+    if (featured === 'true') {
+      query += ` AND featured = $${paramIndex}`;
+      params.push(true);
+      paramIndex++;
+    }
+
+    // Apply sorting
+    if (sort === 'date') {
+      query += ' ORDER BY started_at ASC';
+    } else {
+      query += ' ORDER BY created_at DESC';
+    }
+
+    // Apply limit
+    if (limit) {
+      query += ` LIMIT $${paramIndex}`;
+      params.push(parseInt(limit));
+    }
+
+    const result = await pool.query(query, params);
     res.json({ events: result.rows });
   } catch (err) {
     console.error('Error fetching events:', err);
@@ -129,6 +191,17 @@ app.get('/api/events/:id', async (req, res) => {
     res.json({ event: result.rows[0] });
   } catch (err) {
     console.error('Error fetching event:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get sports categories
+app.get('/api/categories', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT * FROM categories ORDER BY name ASC');
+    res.json({ categories: result.rows });
+  } catch (err) {
+    console.error('Error fetching categories:', err);
     res.status(500).json({ error: err.message });
   }
 });

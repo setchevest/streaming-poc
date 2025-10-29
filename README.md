@@ -93,7 +93,7 @@ This will:
 ### 5. Expose the API (Port Forward)
 
 ```bash
-kubectl port-forward -n streaming-poc svc/streaming-api 3000:3000
+kubectl port-forward -n streaming-poc svc/streaming-api 8000:8000
 ```
 
 Or if you have Ingress configured, access via your domain.
@@ -107,7 +107,7 @@ cd frontend
 npm install
 
 # Create .env.local file
-echo "NEXT_PUBLIC_API_URL=http://localhost:3000" > .env.local
+echo "NEXT_PUBLIC_API_URL=http://localhost:8000" > .env.local
 
 # Development mode
 npm run dev
@@ -162,7 +162,7 @@ credentials-file: /home/<USER>/.cloudflared/<TUNNEL-ID>.json
 
 ingress:
   - hostname: stream.yourdomain.com
-    service: http://localhost:3000
+    service: http://localhost:8000
   - service: http_status:404
 EOF
 

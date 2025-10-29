@@ -68,7 +68,7 @@ npm install
 
 # Configure environment variables
 cat > .env.local << EOF
-NEXT_PUBLIC_API_URL=http://localhost:3000
+NEXT_PUBLIC_API_URL=http://localhost:8000
 EOF
 
 # Start frontend
@@ -144,7 +144,7 @@ chmod +x deploy.sh
 
 ```bash
 # API
-kubectl port-forward -n streaming-poc svc/streaming-api 3000:3000
+kubectl port-forward -n streaming-poc svc/streaming-api 8000:8000
 
 # Transcoder (HLS)
 kubectl port-forward -n streaming-poc svc/transcoder 8081:8080
@@ -238,15 +238,15 @@ kubectl logs -f -l app=nginx-rtmp -n streaming-poc
 
 ```bash
 # Health check
-curl http://localhost:3000/health
+curl http://localhost:8000/health
 
 # Create test event
-curl -X POST http://localhost:3000/api/events \
+curl -X POST http://localhost:8000/api/events \
   -H "Content-Type: application/json" \
   -d '{"title":"Test Event","description":"Testing"}'
 
 # List events
-curl http://localhost:3000/api/events
+curl http://localhost:8000/api/events
 ```
 
 ### RTMP test
@@ -329,7 +329,7 @@ credentials-file: ~/.cloudflared/<TUNNEL-ID>.json
 
 ingress:
   - hostname: stream.yourdomain.com
-    service: http://localhost:3000
+    service: http://localhost:8000
   - service: http_status:404
 EOF
 

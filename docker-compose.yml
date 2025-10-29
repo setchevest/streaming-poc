@@ -89,7 +89,7 @@ services:
       dockerfile: Dockerfile
     container_name: streaming-api
     environment:
-      PORT: 3000
+      PORT: 8000
       DB_HOST: postgres
       DB_PORT: 5432
       DB_NAME: streaming
@@ -101,7 +101,7 @@ services:
       PUBLIC_HOST: localhost
       HLS_PORT: 8081
     ports:
-      - "3000:3000"
+      - "8000:8000"
     networks:
       - streaming-network
     depends_on:
@@ -110,7 +110,7 @@ services:
       minio:
         condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
       timeout: 10s
       retries: 3

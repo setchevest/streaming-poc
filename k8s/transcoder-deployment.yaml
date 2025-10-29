@@ -33,8 +33,8 @@ data:
           
           # Notify backend when HLS segments are ready
           exec_push mkdir -p /tmp/hls/$name;
-          on_publish http://streaming-api:3000/api/transcode/start;
-          on_publish_done http://streaming-api:3000/api/transcode/done;
+          on_publish http://streaming-api:8000/api/transcode/start;
+          on_publish_done http://streaming-api:8000/api/transcode/done;
         }
       }
     }

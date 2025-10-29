@@ -68,7 +68,7 @@ done
 echo -e " ${GREEN}✓${NC}"
 
 echo -n "API Backend"
-until curl -sf http://localhost:3000/health &>/dev/null; do
+until curl -sf http://localhost:8000/health &>/dev/null; do
     echo -n "."
     sleep 2
 done
@@ -103,8 +103,8 @@ echo ""
 echo -e "${BLUE}📊 Available Services:${NC}"
 echo ""
 echo -e "  ${GREEN}API Backend:${NC}"
-echo -e "    http://localhost:3000"
-echo -e "    http://${LOCAL_IP}:3000"
+echo -e "    http://localhost:8000"
+echo -e "    http://${LOCAL_IP}:8000"
 echo ""
 echo -e "  ${GREEN}RTMP Server (for OBS):${NC}"
 echo -e "    rtmp://localhost:1935/live"
@@ -126,7 +126,7 @@ echo ""
 echo "1. Configure the frontend:"
 echo -e "   ${YELLOW}cd frontend${NC}"
 echo -e "   ${YELLOW}npm install${NC}"
-echo -e "   ${YELLOW}echo 'NEXT_PUBLIC_API_URL=http://localhost:3000' > .env.local${NC}"
+echo -e "   ${YELLOW}echo 'NEXT_PUBLIC_API_URL=http://localhost:8000' > .env.local${NC}"
 echo -e "   ${YELLOW}npm run dev${NC}"
 echo ""
 echo "2. Create an event at: http://localhost:3001"

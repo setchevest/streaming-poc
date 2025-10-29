@@ -1,0 +1,33 @@
+{
+  "Navigation": {
+    "home": "Inicio",
+    "events": "Eventos",
+    "live": "En Vivo",
+    "siteName": "StreamHub"
+  },
+  "Homepage": {
+    "pageTitle": "Plataforma de Transmisión de Deportes",
+    "pageDescription": "Mira eventos deportivos en vivo y descubre próximos partidos",
+    "watchLive": "Ver Ahora",
+    "watchLiveButton": "Ver En Vivo",
+    "liveIndicator": "● EN VIVO",
+    "upcomingIndicator": "PRÓXIMO",
+    "featuredEventsTitle": "Eventos Destacados",
+    "featuredEventsDescription": "Selección curada de eventos deportivos premium",
+    "upcomingEventsTitle": "Próximos Eventos",
+    "upcomingEventsDescription": "Explora todos los próximos partidos y competiciones",
+    "browseByCategoryTitle": "Explorar por Categoría",
+    "browseByCategoryDescription": "Encuentra tus deportes y eventos favoritos",
+    "viewAll": "Ver Todo",
+    "noEventsTitle": "Sin Eventos Disponibles",
+    "noEventsDescription": "Vuelve pronto para nuevos eventos deportivos"
+  },
+  "Events": {
+    "pageTitle": "Eventos Deportivos",
+    "noEventsFound": "No se encontraron eventos"
+  },
+  "Common": {
+    "loading": "Cargando...",
+    "error": "Ocurrió un error"
+  }
+}

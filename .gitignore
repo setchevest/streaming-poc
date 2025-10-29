@@ -16,7 +16,7 @@ yarn.lock
 out/
 build/
 dist/
-
+*.tsbuildinfo
 # Production
 /build
 /dist
