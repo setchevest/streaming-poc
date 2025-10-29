@@ -76,7 +76,6 @@ _As a Senior UX/UI Developer, you're responsible for implementing requirements f
     ```xml
     <search_files>
       <path>path/to/components</path>
-      <regex>Button|Card|Modal</regex>
       <file_pattern>*.*</file_pattern>
     </search_files>
     ```
@@ -100,12 +99,13 @@ Include acceptance references and expected flows.
 
 ## 6. Implement (If coding included)
 
-1. Follow approved spec.
-2. Apply DRY and system tokens.
-3. Add in-line documentation for new logic.
-4. If API calls code has been added, please validate backend API exists.
-5. Maintain accessibility standards.
-6. Report deviations from design system.
+1. Create a feature branch.
+2. Follow approved spec.
+3. Apply DRY and system tokens.
+4. Add in-line documentation for new logic.
+5. If API calls code has been added, please validate backend API exists.
+6. Maintain accessibility standards.
+7. Report deviations from design system.
 
 ---
 
@@ -153,3 +153,6 @@ As a senior UI Architect, simulate a peer review:
   <question>The workflow is ready to close. Do you approve the summary or should I refine it?</question>
   <options>["Approve & Close", "Refine Summary", "Reopen UI Spec"]</options>
 </ask_followup_question>
+
+## 10. Close Workflow (On Approval)
+1. Commit all changes to feature branch using conventional commit messages.
