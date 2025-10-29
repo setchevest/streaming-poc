@@ -1,0 +1,447 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===========================
+   Typography & Font Styling
+   =========================== */
+
+html {
+  @apply scroll-smooth;
+  font-feature-settings: 'kern' 1;
+}
+
+body {
+  @apply bg-[#FEFBF7] text-stone;
+  font-family: 'Inter', ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Typography Scales */
+h1 {
+  @apply text-display-lg text-stone font-medium;
+}
+
+h2 {
+  @apply text-headline-lg text-stone font-medium;
+}
+
+h3 {
+  @apply text-headline-sm text-stone font-medium;
+}
+
+h4 {
+  @apply text-title text-stone font-medium;
+}
+
+h5,
+h6 {
+  @apply text-label text-stone font-medium;
+}
+
+p {
+  @apply text-body text-stone leading-relaxed;
+}
+
+small,
+.caption {
+  @apply text-caption text-ash font-normal tracking-widest uppercase;
+}
+
+.label {
+  @apply text-label text-stone font-normal;
+}
+
+/* Monospace for technical data */
+code,
+pre {
+  @apply font-mono;
+}
+
+code {
+  @apply text-caption bg-fog px-1.5 py-0.5 rounded-compact text-concrete;
+}
+
+pre {
+  @apply bg-fog p-4 rounded-default overflow-x-auto text-concrete;
+}
+
+/* ===========================
+   Global Spacing & Layout
+   =========================== */
+
+main {
+  @apply w-full min-h-[calc(100vh-60px)];
+}
+
+.container {
+  @apply mx-auto px-4 md:px-8;
+  @apply max-w-full md:max-w-[768px] lg:max-w-[1024px] xl:max-w-[1280px];
+}
+
+/* ===========================
+   Links & Interactive Elements
+   =========================== */
+
+a {
+  @apply text-signal hover:text-moss transition-smooth focus:outline-none focus:ring-2 focus:ring-signal focus:ring-offset-2;
+}
+
+a:focus-visible {
+  @apply outline-signal outline-offset-2;
+}
+
+/* ===========================
+   Form Elements
+   =========================== */
+
+input,
+textarea,
+select {
+  @apply rounded-default;
+}
+
+input[type='text'],
+input[type='email'],
+input[type='password'],
+input[type='number'],
+input[type='date'],
+textarea,
+select {
+  @apply w-full px-4 py-3;
+  @apply bg-fog border border-ash border-opacity-30;
+  @apply text-stone placeholder-ash placeholder-opacity-50;
+  @apply transition-smooth;
+  @apply font-sans;
+}
+
+input[type='text']::placeholder,
+input[type='email']::placeholder,
+input[type='password']::placeholder,
+input[type='number']::placeholder,
+textarea::placeholder {
+  @apply text-ash text-opacity-50;
+}
+
+/* Focus state - Signal color */
+input:focus,
+textarea:focus,
+select:focus {
+  @apply outline-none border-signal shadow-worn;
+}
+
+/* Error state - Rust color */
+input[aria-invalid='true'],
+textarea[aria-invalid='true'],
+select[aria-invalid='true'] {
+  @apply border-rust;
+}
+
+input:disabled,
+textarea:disabled,
+select:disabled {
+  @apply bg-dust opacity-50 cursor-not-allowed;
+}
+
+/* ===========================
+   Buttons
+   =========================== */
+
+button {
+  @apply inline-flex items-center justify-center;
+  @apply px-4 py-3 min-h-[44px] min-w-[44px];
+  @apply font-medium text-base;
+  @apply transition-smooth;
+  @apply rounded-default;
+  @apply cursor-pointer;
+  @apply focus:outline-none focus:ring-2 focus:ring-signal focus:ring-offset-2;
+}
+
+button:focus-visible {
+  @apply outline-signal outline-offset-2;
+}
+
+button:disabled {
+  @apply opacity-50 cursor-not-allowed;
+}
+
+/* Primary Button */
+.btn-primary {
+  @apply bg-signal text-dust;
+  @apply hover:bg-moss shadow-worn;
+  @apply active:scale-95 active:shadow-layered;
+}
+
+/* Secondary Button */
+.btn-secondary {
+  @apply bg-concrete text-dust;
+  @apply hover:bg-stone shadow-worn;
+  @apply active:scale-95;
+}
+
+/* Ghost Button */
+.btn-ghost {
+  @apply bg-transparent text-stone;
+  @apply border border-ash border-opacity-50;
+  @apply hover:bg-dust hover:border-opacity-75;
+  @apply active:scale-95;
+}
+
+/* Worn Button */
+.btn-worn {
+  @apply bg-clay text-dust;
+  @apply hover:bg-rust shadow-worn;
+  @apply active:scale-95;
+}
+
+/* ===========================
+   Cards & Surfaces
+   =========================== */
+
+.card {
+  @apply relative;
+  @apply bg-dust border border-ash border-opacity-30;
+  @apply rounded-default;
+  @apply shadow-worn;
+  @apply overflow-hidden;
+}
+
+.card.elevated {
+  @apply bg-fog;
+  @apply shadow-layered;
+}
+
+.card.flat {
+  @apply shadow-none border-none;
+}
+
+/* ===========================
+   Badges
+   =========================== */
+
+.badge {
+  @apply inline-flex items-center;
+  @apply px-3 py-1;
+  @apply rounded-compact;
+  @apply text-caption font-mono;
+  @apply gap-1.5;
+}
+
+.badge-live {
+  @apply bg-warning text-shadow;
+  @apply animate-pulse;
+}
+
+.badge-live::before {
+  @apply inline-block w-1.5 h-1.5 rounded-full bg-current animate-pulse;
+  content: '';
+}
+
+.badge-upcoming {
+  @apply bg-moss text-dust;
+}
+
+.badge-ended {
+  @apply bg-concrete text-dust;
+}
+
+.badge-featured {
+  @apply bg-signal text-shadow;
+}
+
+/* ===========================
+   Lists & Navigation
+   =========================== */
+
+ul,
+ol {
+  @apply list-inside;
+}
+
+li {
+  @apply mb-2;
+}
+
+/* ===========================
+   Images
+   =========================== */
+
+img {
+  @apply max-w-full h-auto;
+}
+
+/* Image with gradient overlay */
+.image-overlay {
+  @apply relative;
+}
+
+.image-overlay::after {
+  @apply absolute inset-0;
+  @apply bg-gradient-to-t from-shadow via-transparent to-transparent;
+  content: '';
+}
+
+/* ===========================
+   Accessibility & Motion
+   =========================== */
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    @apply scroll-auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: more) {
+  body {
+    @apply text-shadow;
+  }
+
+  a {
+    @apply text-shadow underline;
+  }
+
+  button {
+    @apply border-2 border-stone;
+  }
+}
+
+/* Dark mode (future support) */
+@media (prefers-color-scheme: dark) {
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-[#1a1817] text-fog;
+  }
+
+  .card {
+    @apply bg-[#2a2725] border-stone border-opacity-30;
+  }
+
+  input,
+  textarea,
+  select {
+    @apply bg-[#3a3735] border-stone border-opacity-50 text-fog;
+  }
+}
+
+/* ===========================
+   Utility Classes
+   =========================== */
+
+/* Text utilities */
+.text-truncate {
+  @apply overflow-hidden text-ellipsis whitespace-nowrap;
+}
+
+.text-clamp-2 {
+  @apply line-clamp-2;
+}
+
+.text-clamp-3 {
+  @apply line-clamp-3;
+}
+
+/* Positioning utilities */
+.absolute-center {
+  @apply absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2;
+}
+
+/* Flex utilities */
+.flex-center {
+  @apply flex items-center justify-center;
+}
+
+.flex-between {
+  @apply flex items-center justify-between;
+}
+
+/* Grid utilities */
+.grid-auto-fit {
+  @apply grid auto-cols-[minmax(250px,1fr)] gap-4;
+}
+
+/* Overlay utilities */
+.overlay-dark {
+  @apply fixed inset-0 bg-shadow bg-opacity-40 backdrop-blur-subtle;
+  z-index: 40;
+}
+
+/* Responsive helpers */
+.hide-mobile {
+  @apply hidden md:block;
+}
+
+.hide-desktop {
+  @apply md:hidden;
+}
+
+/* ===========================
+   Component-Specific Styles
+   =========================== */
+
+/* Navigation */
+nav {
+  @apply sticky top-0 z-50;
+  @apply bg-dust border-b border-ash border-opacity-30;
+  @apply shadow-worn;
+}
+
+nav a {
+  @apply px-4 py-2;
+  @apply hover:bg-fog transition-smooth;
+}
+
+/* Video player container */
+.video-container {
+  @apply relative w-full;
+  aspect-ratio: 16 / 9;
+  @apply rounded-soft overflow-hidden;
+  @apply shadow-layered;
+}
+
+/* Loading skeleton */
+.skeleton {
+  @apply animate-pulse;
+  @apply bg-gradient-to-r from-fog via-dust to-fog;
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: calc(200% + 20px) 0;
+  }
+}
+
+/* ===========================
+   Print Styles
+   =========================== */
+
+@media print {
+  body {
+    @apply text-black bg-white;
+  }
+
+  a {
+    @apply text-blue-600 underline;
+  }
+
+  .no-print {
+    @apply hidden;
+  }
+}

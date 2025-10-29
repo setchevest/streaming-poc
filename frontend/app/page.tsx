@@ -4,6 +4,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import axios from 'axios';
+import { gridStyles } from '@/app/lib/styles/design-system';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -38,96 +39,95 @@ export default function Home() {
 
   const getStatusBadge = (status: string) => {
     const badges = {
-      live: 'bg-red-500 text-white animate-pulse',
-      scheduled: 'bg-blue-500 text-white',
-      ended: 'bg-gray-500 text-white'
+      live: 'badge-live',
+      upcoming: 'badge-upcoming',
+      ended: 'badge-ended'
     };
-    return badges[status as keyof typeof badges] || 'bg-gray-300';
+    return badges[status as keyof typeof badges] || 'badge-upcoming';
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-dust flex items-center justify-center">
         <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Cargando eventos...</p>
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-signal mx-auto"></div>
+          <p className="mt-4 text-concrete">Cargando eventos...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between h-16 items-center">
-            <h1 className="text-2xl font-bold text-gray-900">
-              🎥 StreamHub
-            </h1>
-            <Link 
-              href="/create"
-              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition"
-            >
-              Crear Evento
-            </Link>
-          </div>
+    <div className="min-h-screen bg-dust">
+      <nav className="bg-dust border-b border-ash border-opacity-30 shadow-worn sticky top-0 z-50">
+        <div className="container flex justify-between h-16 items-center">
+          <h1 className="text-headline-sm font-medium text-stone">
+            🎥 Streaming Platform
+          </h1>
+          <Link
+            href="/create"
+            className="btn-primary px-4 py-2"
+          >
+            Crear Evento
+          </Link>
         </div>
       </nav>
 
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="container py-8">
         <div className="mb-8">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">Eventos en Vivo</h2>
-          <p className="text-gray-600">Transmisiones deportivas de clubes locales</p>
+          <h2 className="text-display-sm font-medium text-stone mb-2">Eventos en Vivo</h2>
+          <p className="text-body text-concrete">Transmisiones deportivas de clubes locales</p>
         </div>
 
         {events.length === 0 ? (
           <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">No hay eventos disponibles</p>
-            <Link 
+            <p className="text-body text-ash mb-4">No hay eventos disponibles</p>
+            <Link
               href="/create"
-              className="inline-block mt-4 text-blue-500 hover:text-blue-600"
+              className="btn-primary inline-flex px-4 py-3"
             >
               Crear el primer evento →
             </Link>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className={gridStyles['responsive-3']}>
             {events.map((event) => (
-              <Link 
-                key={event.id} 
+              <Link
+                key={event.id}
                 href={`/watch/${event.id}`}
-                className="bg-white rounded-lg shadow hover:shadow-lg transition overflow-hidden"
+                className="card hover:shadow-layered transition-shadow duration-300 group overflow-hidden"
               >
-                <div className="aspect-video bg-gray-200 relative">
+                <div className="aspect-video bg-fog relative overflow-hidden">
                   {event.thumbnail_url ? (
-                    <img 
-                      src={event.thumbnail_url} 
+                    <img
+                      src={event.thumbnail_url}
                       alt={event.title}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-400">
-                      <svg className="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                    <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-fog to-ash">
+                      <svg className="w-16 h-16 text-stone" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
                       </svg>
                     </div>
                   )}
-                  <div className="absolute top-2 right-2">
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold uppercase ${getStatusBadge(event.status)}`}>
-                      {event.status === 'live' ? '● EN VIVO' : event.status}
+                  <div className="absolute inset-0 bg-gradient-to-t from-shadow via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-200"></div>
+                  <div className="absolute top-3 right-3 z-10">
+                    <span className={`${getStatusBadge(event.status)}`}>
+                      {event.status === 'live' ? '● LIVE' : event.status.toUpperCase()}
                     </span>
                   </div>
                 </div>
                 <div className="p-4">
-                  <h3 className="font-semibold text-lg text-gray-900 mb-2">
+                  <h3 className="text-title font-medium text-stone mb-2 line-clamp-2">
                     {event.title}
                   </h3>
                   {event.description && (
-                    <p className="text-gray-600 text-sm line-clamp-2">
+                    <p className="text-body text-concrete line-clamp-2 mb-3">
                       {event.description}
                     </p>
                   )}
-                  <p className="text-gray-400 text-xs mt-2">
+                  <p className="text-caption text-ash font-mono">
                     {new Date(event.created_at).toLocaleDateString('es-AR', {
                       year: 'numeric',
                       month: 'long',

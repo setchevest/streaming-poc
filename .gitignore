@@ -54,7 +54,8 @@ temp/
 *.tmp
 
 # HLS segments (development)
-*.ts
+hls/
+streaming/
 *.m3u8
 
 # Backups
