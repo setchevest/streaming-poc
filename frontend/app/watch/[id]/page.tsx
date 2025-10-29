@@ -6,6 +6,7 @@ import { useParams } from 'next/navigation';
 import axios from 'axios';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
+import StatisticsPanel from '@/components/features/StatisticsPanel';
 
 // Import VideoPlayer as client-only component
 const VideoPlayer = dynamic(() => import('@/components/VideoPlayer'), {
@@ -142,7 +143,15 @@ export default function WatchPage() {
           </div>
 
           {/* Chat/Info Sidebar */}
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 space-y-6">
+            {/* Stream Statistics Panel */}
+            <StatisticsPanel
+              eventId={event.id}
+              isLive={event.status === 'live'}
+              updateInterval={5000}
+            />
+
+            {/* Event Information */}
             <div className="bg-gray-800 rounded-lg p-6 shadow-lg">
               <h3 className="text-xl font-semibold text-white mb-4">Información</h3>
               <div className="space-y-4 text-gray-300">

@@ -67,6 +67,10 @@ async function initDB() {
         id SERIAL PRIMARY KEY,
         event_id INTEGER REFERENCES events(id),
         viewers INTEGER DEFAULT 0,
+        peak_viewers INTEGER DEFAULT 0,
+        uptime_minutes INTEGER DEFAULT 0,
+        buffer_rate DECIMAL(5, 2) DEFAULT 0.0,
+        avg_bitrate INTEGER DEFAULT 0,
         timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `);
@@ -318,6 +322,144 @@ app.get('/api/stream/:streamKey', async (req, res) => {
     });
   } catch (err) {
     console.error('Error fetching stream:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get current stream statistics for an event
+app.get('/api/events/:id/stats', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Get latest stats entry
+    const result = await pool.query(
+      `SELECT * FROM stream_stats
+       WHERE event_id = $1
+       ORDER BY timestamp DESC
+       LIMIT 1`,
+      [id]
+    );
+
+    if (result.rows.length === 0) {
+      // Return default stats if no stats exist yet
+      return res.json({
+        stats: {
+          event_id: id,
+          viewers: 0,
+          peak_viewers: 0,
+          uptime_minutes: 0,
+          buffer_rate: 0,
+          avg_bitrate: 0,
+          timestamp: new Date(),
+        },
+      });
+    }
+
+    res.json({ stats: result.rows[0] });
+  } catch (err) {
+    console.error('Error fetching stream stats:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get historical stream statistics for analytics
+app.get('/api/events/:id/stats/history', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { hours = 24 } = req.query;
+
+    const result = await pool.query(
+      `SELECT * FROM stream_stats
+       WHERE event_id = $1
+       AND timestamp >= NOW() - INTERVAL '${parseInt(hours)} hours'
+       ORDER BY timestamp ASC`,
+      [id]
+    );
+
+    res.json({ stats: result.rows });
+  } catch (err) {
+    console.error('Error fetching stream stats history:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Record stream statistics (called by monitoring system)
+app.post('/api/events/:id/stats', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { viewers, peak_viewers, uptime_minutes, buffer_rate, avg_bitrate } = req.body;
+
+    const result = await pool.query(
+      `INSERT INTO stream_stats
+       (event_id, viewers, peak_viewers, uptime_minutes, buffer_rate, avg_bitrate, timestamp)
+       VALUES ($1, $2, $3, $4, $5, $6, NOW())
+       RETURNING *`,
+      [id, viewers || 0, peak_viewers || 0, uptime_minutes || 0, buffer_rate || 0, avg_bitrate || 0]
+    );
+
+    res.json({ success: true, stats: result.rows[0] });
+  } catch (err) {
+    console.error('Error recording stream stats:', err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+// Get aggregated analytics for an event
+app.get('/api/events/:id/analytics', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { hours = 24 } = req.query;
+
+    // Get event details
+    const eventResult = await pool.query('SELECT * FROM events WHERE id = $1', [id]);
+    if (eventResult.rows.length === 0) {
+      return res.status(404).json({ error: 'Event not found' });
+    }
+
+    const event = eventResult.rows[0];
+
+    // Calculate uptime in minutes
+    let uptimeMinutes = 0;
+    if (event.started_at && event.ended_at) {
+      uptimeMinutes = Math.floor(
+        (new Date(event.ended_at) - new Date(event.started_at)) / 60000
+      );
+    } else if (event.started_at && event.status === 'live') {
+      uptimeMinutes = Math.floor((new Date() - new Date(event.started_at)) / 60000);
+    }
+
+    // Get stats data
+    const statsResult = await pool.query(
+      `SELECT
+        MAX(viewers) as peak_viewers,
+        AVG(viewers)::INTEGER as avg_viewers,
+        MAX(buffer_rate)::DECIMAL(5, 2) as max_buffer_rate,
+        AVG(buffer_rate)::DECIMAL(5, 2) as avg_buffer_rate,
+        AVG(avg_bitrate)::INTEGER as avg_bitrate,
+        COUNT(*) as sample_count
+       FROM stream_stats
+       WHERE event_id = $1
+       AND timestamp >= NOW() - INTERVAL '${parseInt(hours)} hours'`,
+      [id]
+    );
+
+    const stats = statsResult.rows[0];
+
+    res.json({
+      analytics: {
+        event_id: id,
+        event_title: event.title,
+        uptime_minutes: uptimeMinutes,
+        peak_viewers: stats.peak_viewers || 0,
+        avg_viewers: stats.avg_viewers || 0,
+        max_buffer_rate: stats.max_buffer_rate || 0,
+        avg_buffer_rate: stats.avg_buffer_rate || 0,
+        avg_bitrate: stats.avg_bitrate || 0,
+        sample_count: stats.sample_count || 0,
+      },
+    });
+  } catch (err) {
+    console.error('Error fetching analytics:', err);
     res.status(500).json({ error: err.message });
   }
 });
